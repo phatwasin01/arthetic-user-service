@@ -8,13 +8,13 @@ import {
   signJwtToken,
   AuthContext,
 } from "../libs/auth";
+import { checkAuthContextThrowError } from "../utils/context";
 const resolvers: GraphQLResolverMap<AuthContext> = {
   Query: {
-    users: async (parent: any, args: any, context) => {
-      console.log("users", context);
+    users: async () => {
       return await prisma.user.findMany();
     },
-    user: async (_: any, args: any) => {
+    user: async (_: any, args: { id: string }) => {
       const { id } = args;
       return await prisma.user.findUnique({
         where: {
@@ -31,14 +31,7 @@ const resolvers: GraphQLResolverMap<AuthContext> = {
       });
     },
     userProfile: async (parent: unknown, args: unknown, context) => {
-      const { userId } = context;
-      if (!userId) {
-        throw new GraphQLError("Unauthorized", {
-          extensions: {
-            code: "UNAUTHORIZED",
-          },
-        });
-      }
+      const userId = checkAuthContextThrowError(context);
       return await prisma.user.findUnique({
         where: {
           id: userId,
@@ -47,8 +40,7 @@ const resolvers: GraphQLResolverMap<AuthContext> = {
     },
   },
   Posts: {
-    author: async (parent: any, args: any) => {
-      console.log("Posts Parent: ", parent);
+    author: async (parent: { userId: string }) => {
       const { userId } = parent;
       return await prisma.user.findUnique({
         where: {
@@ -56,10 +48,18 @@ const resolvers: GraphQLResolverMap<AuthContext> = {
         },
       });
     },
+    repostUser: async (parent: { repostUserId: string }) => {
+      const { repostUserId } = parent;
+      if (!repostUserId) return null;
+      return await prisma.user.findUnique({
+        where: {
+          id: repostUserId,
+        },
+      });
+    },
   },
   Comments: {
-    author: async (parent: any, args: any) => {
-      console.log("Comments Parent: ", parent);
+    author: async (parent: { userId: string }) => {
       const { userId } = parent;
       return await prisma.user.findUnique({
         where: {
@@ -69,11 +69,11 @@ const resolvers: GraphQLResolverMap<AuthContext> = {
     },
   },
   Likes: {
-    user: async (like: any) => {
-      console.log("Likes Info: ", like);
+    user: async (parent: { userId: string }) => {
+      const { userId } = parent;
       return await prisma.user.findUnique({
         where: {
-          id: like.userId,
+          id: userId,
         },
       });
     },
@@ -85,7 +85,6 @@ const resolvers: GraphQLResolverMap<AuthContext> = {
           followerId: parent.id,
         },
       });
-      console.log("following", following);
       return following;
     },
     followers: async (parent: { id: string }) => {
@@ -101,21 +100,24 @@ const resolvers: GraphQLResolverMap<AuthContext> = {
           followerId: parent.id,
         },
       });
-      return following.map((follow) => follow.followingId);
+      const followingIds = following.map((follow) => follow.followerId);
+      return followingIds;
     },
   },
   Follows: {
-    follower: async (follow: any) => {
+    follower: async (parent: { followerId: string }) => {
+      const { followerId } = parent;
       return await prisma.user.findUnique({
         where: {
-          id: follow.followerId,
+          id: followerId,
         },
       });
     },
-    following: async (follow: any) => {
+    following: async (parent: { followingId: string }) => {
+      const { followingId } = parent;
       return await prisma.user.findUnique({
         where: {
-          id: follow.followingId,
+          id: followingId,
         },
       });
     },
@@ -196,12 +198,12 @@ const resolvers: GraphQLResolverMap<AuthContext> = {
         });
       }
     },
-    followUser: async (parent: any, args: any, context) => {
-      const { userId } = context;
-      if (!userId) {
-        throw new GraphQLError("Unauthorized", {
+    followUser: async (parent: any, args: { followingId: string }, context) => {
+      const userId = checkAuthContextThrowError(context);
+      if (userId === args.followingId) {
+        throw new GraphQLError("You cannot follow yourself", {
           extensions: {
-            code: "UNAUTHORIZED",
+            code: "CANNOT_FOLLOW_YOURSELF",
           },
         });
       }
@@ -213,15 +215,12 @@ const resolvers: GraphQLResolverMap<AuthContext> = {
       });
       return follow;
     },
-    unfollowUser: async (parent: any, args: any, context) => {
-      const { userId } = context;
-      if (!userId) {
-        throw new GraphQLError("Unauthorized", {
-          extensions: {
-            code: "UNAUTHORIZED",
-          },
-        });
-      }
+    unfollowUser: async (
+      parent: any,
+      args: { followingId: string },
+      context
+    ) => {
+      const userId = checkAuthContextThrowError(context);
       const follow = await prisma.follow.delete({
         where: {
           followerId_followingId: {

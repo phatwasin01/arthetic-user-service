@@ -28,10 +28,12 @@ const typeDefs = gql`
     userId: ID!
     user: User
   }
-  type Posts @key(fields: "id userId") {
+  type Posts @key(fields: "id userId repostUserId") {
     id: ID!
     userId: String!
+    repostUserId: String
     author: User
+    repostUser: User
   }
   type Comments @key(fields: "id userId") {
     id: ID!
