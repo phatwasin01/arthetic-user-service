@@ -51,4 +51,4 @@ jobs:
           cache: "pnpm"
       - run: pnpm install
       - run: pnpm build
-      - run: pnpm start:migrate
+      - run: pnpm migrate
