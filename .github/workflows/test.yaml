@@ -14,6 +14,12 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     # Service containers to run with `container-job`
+    env:
+      DATABASE_URL: postgres://root:secret@localhost:5432/arthetic?sslmode=disable
+      JWT_SECRET: secret
+      JWT_EXPIRES_IN: "4h"
+      SALT_ROUNDS: 10
+      PORT: 4000
     services:
       # Label used to access the service container
       postgres:
@@ -43,12 +49,6 @@ jobs:
         with:
           node-version: "18"
           cache: "pnpm"
-        env:
-          DATABASE_URL: postgres://root:secret@localhost:5432/arthetic?sslmode=disable
-          JWT_SECRET: secret
-          JWT_EXPIRES_IN: "4h"
-          SALT_ROUNDS: 10
-          PORT: 4000
       - run: pnpm install
       - run: pnpm build
       - run: pnpm start:migrate
