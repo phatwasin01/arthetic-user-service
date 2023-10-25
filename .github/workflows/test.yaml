@@ -59,6 +59,7 @@ jobs:
     permissions:
       contents: "read"
       id-token: "write"
+      actions: "read"
     steps:
       # actions/checkout MUST come before auth
       - uses: "actions/checkout@v4"
@@ -79,3 +80,9 @@ jobs:
         run: |
           docker build -t asia-southeast1-docker.pkg.dev/arthetic/arthetic-images/users-svc:latest .
           docker push asia-southeast1-docker.pkg.dev/arthetic/arthetic-images/users-svc:latest
+
+      - name: Deploy to GKE
+        run: |
+          gcloud container clusters get-credentials arthetic --zone asia-southeast1-a --project arthetic
+          kubectl apply -f user-service/gke/deployment.yaml
+          kubectl apply -f user-service/gke/service.yaml

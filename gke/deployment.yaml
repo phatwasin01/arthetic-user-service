@@ -14,6 +14,7 @@ spec:
       containers:
       - name: users-app
         image: asia-southeast1-docker.pkg.dev/arthetic/arthetic-images/users-svc:latest
+        imagePullPolicy: Always
         resources:
           limits:
             memory: "128Mi"
