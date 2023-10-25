@@ -5,7 +5,7 @@ name: Run Test
 
 on:
   push:
-    branches: ["main"]
+    branches: ["main", "cicd"]
   pull_request:
     branches: ["main"]
 
@@ -52,3 +52,29 @@ jobs:
       - run: pnpm install
       - run: pnpm build
       - run: pnpm migrate
+
+  deploy:
+    name: Build Image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: "read"
+      id-token: "write"
+    steps:
+      # actions/checkout MUST come before auth
+      - uses: "actions/checkout@v4"
+
+      - id: "auth"
+        name: "Authenticate to Google Cloud"
+        uses: "google-github-actions/auth@v1"
+        with:
+          workload_identity_provider: "projects/563408574198/locations/global/workloadIdentityPools/arthetic-pool/providers/arthetic-provider"
+          service_account: "arthetic-service-account@arthetic.iam.gserviceaccount.com"
+
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v1
+
+      - name: Build and push
+        run: |
+          gcloud auth configure-docker gcr.io
+          docker build -t gcr.io/arthetic/users-svc:latest .
+          docker push gcr.io/arthetic/users-svc:latest
