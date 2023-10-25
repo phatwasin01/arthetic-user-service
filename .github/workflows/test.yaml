@@ -67,9 +67,10 @@ jobs:
         name: "Authenticate to Google Cloud"
         uses: "google-github-actions/auth@v1"
         with:
+          token_format: "access_token"
           workload_identity_provider: "projects/563408574198/locations/global/workloadIdentityPools/arthetic-pool/providers/arthetic-provider"
           service_account: "arthetic-service-account@arthetic.iam.gserviceaccount.com"
-
+          access_token_lifetime: "300s"
       - name: Login to GAR
         uses: docker/login-action@v3
         with:
