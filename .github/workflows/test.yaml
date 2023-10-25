@@ -67,8 +67,8 @@ jobs:
         name: "Authenticate to Google Cloud"
         uses: "google-github-actions/auth@v1"
         with:
-          workload_identity_provider: "projects/563408574198/locations/global/workloadIdentityPools/arthetic-pool/providers/arthetic-provider"
-          service_account: "arthetic-service-account@arthetic.iam.gserviceaccount.com"
+          workload_identity_provider: projects/563408574198/locations/global/workloadIdentityPools/arthetic-pool/providers/arthetic-provider
+          service_account: arthetic-service-account@arthetic.iam.gserviceaccount.com
 
       - name: Configure Docker to use gcloud command-line tool as a credential helper
         run: gcloud --quiet auth configure-docker asia-southeast1-docker.pkg.dev

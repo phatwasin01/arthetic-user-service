@@ -39,4 +39,4 @@ RUN pnpm install --production
 EXPOSE 4000
 
 # Command to run the application
-CMD ["./wait-for.sh", "postgres:5432", "--", "pnpm", "start:migrate"]
+CMD ["pnpm", "start:migrate"]
