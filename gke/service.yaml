@@ -1,5 +1,6 @@
 apiVersion: v1
 kind: Service
+namespace: default
 metadata:
   name: users-svc
 spec:
