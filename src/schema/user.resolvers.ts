@@ -12,6 +12,9 @@ import {
 import { checkAuthContextThrowError } from "../utils/context";
 const resolvers: GraphQLResolverMap<AuthContext> = {
   Query: {
+    helloworld: () => {
+      return "hello world";
+    },
     users: async () => {
       return await prisma.user.findMany();
     },

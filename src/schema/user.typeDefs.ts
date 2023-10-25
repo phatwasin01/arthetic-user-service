@@ -46,6 +46,7 @@ const typeDefs = gql`
     userFollows(id: ID!): [Follows]
     publicUserProfile(username: String!): User
     userProfile: User
+    helloworld: String
   }
   type Mutation {
     createUser(
