@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { GraphQLResolverMap } from "@apollo/subgraph/dist/schema-helper";
 import prisma from "../db";
 import { Prisma } from "@prisma/client";

@@ -1,0 +1,34 @@
+version: "3.9"
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=secret
+      - POSTGRES_DB=arthetic
+    networks:
+      - user_network
+    ports:
+      - "5432:5432"
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    networks:
+      - user_network
+    ports:
+      - "4000:4000"
+    environment:
+      - DATABASE_URL=postgres://root:secret@postgres:5432/arthetic?sslmode=disable
+      - JWT_SECRET=85b4f1b784d00b1393eb9f2e355016df2c66146caed53b247e2eb8106d1f2fb2
+      - JWT_EXPIRES_IN="4h"
+      - SALT_ROUNDS=10
+      - PORT=4000
+    command: ["./wait-for.sh", "postgres:5432", "--", "pnpm", "start:migrate"]
+    depends_on:
+      - postgres
+
+networks:
+  user_network:
+    name: user_network
+    driver: bridge
