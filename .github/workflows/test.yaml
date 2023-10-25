@@ -48,32 +48,32 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: "18"
-          cache: "pnpm"
       - run: pnpm install
       - run: pnpm build
-      - run: pnpm migrate
+      - run: pnpx prisma migrate dev
+      - run: pnpx prisma generate
 
-  deploy:
-    name: Build Image
-    runs-on: ubuntu-latest
-    permissions:
-      contents: "read"
-      id-token: "write"
-    steps:
-      # actions/checkout MUST come before auth
-      - uses: "actions/checkout@v4"
+  # deploy:
+  #   name: Build Image
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     contents: "read"
+  #     id-token: "write"
+  #   steps:
+  #     # actions/checkout MUST come before auth
+  #     - uses: "actions/checkout@v4"
 
-      - id: "auth"
-        name: "Authenticate to Google Cloud"
-        uses: "google-github-actions/auth@v1"
-        with:
-          workload_identity_provider: "projects/563408574198/locations/global/workloadIdentityPools/arthetic-pool/providers/arthetic-provider"
-          service_account: "arthetic-service-account@arthetic.iam.gserviceaccount.com"
+  #     - id: "auth"
+  #       name: "Authenticate to Google Cloud"
+  #       uses: "google-github-actions/auth@v1"
+  #       with:
+  #         workload_identity_provider: "projects/563408574198/locations/global/workloadIdentityPools/arthetic-pool/providers/arthetic-provider"
+  #         service_account: "arthetic-service-account@arthetic.iam.gserviceaccount.com"
 
-      - name: Build and push
-        run: |
-          gcloud auth configure-docker asia-southeast1-docker.pkg.dev
-          gcloud config set artifact/registry arthectic-images
-          gcloud config set artifact/location asia-southeast1
-          docker build -t asia-southeast1-docker.pkg.dev/arthetic/arthetic-images/users-svc:latest .
-          docker push asia-southeast1-docker.pkg.dev/arthetic/arthetic-images/users-svc:latest
+  #     - name: Build and push
+  #       run: |
+  #         gcloud auth configure-docker asia-southeast1-docker.pkg.dev
+  #         gcloud config set artifact/registry arthectic-images
+  #         gcloud config set artifact/location asia-southeast1
+  #         docker build -t asia-southeast1-docker.pkg.dev/arthetic/arthetic-images/users-svc:latest .
+  #         docker push asia-southeast1-docker.pkg.dev/arthetic/arthetic-images/users-svc:latest
