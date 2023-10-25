@@ -83,6 +83,7 @@ jobs:
 
       - name: Deploy to GKE
         run: |
+          gcloud components install gke-gcloud-auth-plugin
           gcloud container clusters get-credentials arthetic-cluster --region asia-southeast1 --project arthetic
           kubectl apply -f user-service/gke/deployment.yaml
           kubectl apply -f user-service/gke/service.yaml
