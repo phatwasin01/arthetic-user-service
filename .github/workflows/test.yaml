@@ -70,11 +70,10 @@ jobs:
           workload_identity_provider: "projects/563408574198/locations/global/workloadIdentityPools/arthetic-pool/providers/arthetic-provider"
           service_account: "arthetic-service-account@arthetic.iam.gserviceaccount.com"
 
-      - name: Set up Docker
-        uses: docker/setup-buildx-action@v1
-
       - name: Build and push
         run: |
-          gcloud auth configure-docker gcr.io
-          docker build -t gcr.io/arthetic/users-svc:latest .
-          docker push gcr.io/arthetic/users-svc:latest
+          gcloud config set artifact/registry arthectic-images
+          gcloud config set artifact/location asia-southeast1
+          gcloud auth configure-docker asia-southeast1-docker.pkg.dev
+          docker build -t asia-southeast1-docker.pkg.dev/arthetic/arthetic-images/users-svc:latest .
+          docker push asia-southeast1-docker.pkg.dev/arthetic/arthetic-images/users-svc:latest
