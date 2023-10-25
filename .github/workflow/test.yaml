@@ -1,0 +1,50 @@
+# # This workflow will build a golang project
+# # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
+
+name: Run Test
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    # Service containers to run with `container-job`
+    services:
+      # Label used to access the service container
+      postgres:
+        # Docker Hub image
+        image: postgres:15
+        # Provide the password for postgres
+        env:
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: secret
+          POSTGRES_DB: ticketx
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          # Maps tcp port 5432 on service container to the host
+          - 5432:5432
+        
+    steps:
+    - uses: actions/checkout@v4
+    - uses: pnpm/action-setup@0609f0983b7a228f052f81ef4c3d6510cae254ad
+      with:
+        version: 8.7.6
+    - uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'pnpm'
+    - run: pnpm install
+    - run: pnpm build
+    - run: pnpm start:migrate
+    
