@@ -50,7 +50,7 @@ jobs:
           node-version: "18"
       - run: pnpm install
       - run: pnpm build
-      - run: pnpx prisma migrate dev
+      - run: pnpx prisma migrate deploy
       - run: pnpx prisma generate
 
   # deploy:
