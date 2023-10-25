@@ -5,12 +5,11 @@ name: Run Test
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
-
   test:
     name: Test
     runs-on: ubuntu-latest
@@ -24,7 +23,7 @@ jobs:
         env:
           POSTGRES_USER: root
           POSTGRES_PASSWORD: secret
-          POSTGRES_DB: ticketx
+          POSTGRES_DB: arthetic
         # Set health checks to wait until postgres has started
         options: >-
           --health-cmd pg_isready
@@ -34,17 +33,22 @@ jobs:
         ports:
           # Maps tcp port 5432 on service container to the host
           - 5432:5432
-        
+
     steps:
-    - uses: actions/checkout@v4
-    - uses: pnpm/action-setup@0609f0983b7a228f052f81ef4c3d6510cae254ad
-      with:
-        version: 8.7.6
-    - uses: actions/setup-node@v3
-      with:
-        node-version: '18'
-        cache: 'pnpm'
-    - run: pnpm install
-    - run: pnpm build
-    - run: pnpm start:migrate
-    
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@0609f0983b7a228f052f81ef4c3d6510cae254ad
+        with:
+          version: 8.7.6
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+          cache: "pnpm"
+        env:
+          DATABASE_URL: postgres://root:secret@localhost:5432/arthetic?sslmode=disable
+          JWT_SECRET: secret
+          JWT_EXPIRES_IN: "4h"
+          SALT_ROUNDS: 10
+          PORT: 4000
+      - run: pnpm install
+      - run: pnpm build
+      - run: pnpm start:migrate
