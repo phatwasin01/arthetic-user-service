@@ -72,8 +72,8 @@ jobs:
 
       - name: Build and push
         run: |
+          gcloud auth configure-docker asia-southeast1-docker.pkg.dev
           gcloud config set artifact/registry arthectic-images
           gcloud config set artifact/location asia-southeast1
-          gcloud auth configure-docker asia-southeast1-docker.pkg.dev
           docker build -t asia-southeast1-docker.pkg.dev/arthetic/arthetic-images/users-svc:latest .
           docker push asia-southeast1-docker.pkg.dev/arthetic/arthetic-images/users-svc:latest

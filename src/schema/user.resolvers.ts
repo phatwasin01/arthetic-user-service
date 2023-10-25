@@ -15,7 +15,7 @@ const resolvers: GraphQLResolverMap<AuthContext> = {
     users: async () => {
       return await prisma.user.findMany();
     },
-    user: async (_: any, args: { id: string }) => {
+    user: async (_: unknown, args: { id: string }) => {
       const { id } = args;
       return await prisma.user.findUnique({
         where: {
@@ -23,7 +23,7 @@ const resolvers: GraphQLResolverMap<AuthContext> = {
         },
       });
     },
-    publicUserProfile: async (_: any, args: { username: string }) => {
+    publicUserProfile: async (_: unknown, args: { username: string }) => {
       const { username } = args;
       return await prisma.user.findUnique({
         where: {
@@ -125,7 +125,7 @@ const resolvers: GraphQLResolverMap<AuthContext> = {
   },
   Mutation: {
     createUser: async (
-      parent: any,
+      parent: unknown,
       args: { username: string; password: string; fname: string; lname: string }
     ) => {
       try {
@@ -157,7 +157,7 @@ const resolvers: GraphQLResolverMap<AuthContext> = {
       }
     },
     login: async (
-      parent: any,
+      parent: unknown,
       args: { username: string; password: string }
     ) => {
       try {
@@ -199,7 +199,11 @@ const resolvers: GraphQLResolverMap<AuthContext> = {
         });
       }
     },
-    followUser: async (parent: any, args: { followingId: string }, context) => {
+    followUser: async (
+      parent: unknown,
+      args: { followingId: string },
+      context
+    ) => {
       const userId = checkAuthContextThrowError(context);
       if (userId === args.followingId) {
         throw new GraphQLError("You cannot follow yourself", {
