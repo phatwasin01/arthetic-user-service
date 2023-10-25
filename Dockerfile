@@ -1,42 +1,22 @@
-# ------ Builder Stage ------
-FROM node:18-bullseye-slim AS builder
+# Version 4
+FROM node:18-bullseye-slim 
 WORKDIR /app
-
-# Install global dependencies
 RUN npm install -g pnpm
-
-# Copy package files
-COPY package.json pnpm-lock.yaml ./
-
-# Install project dependencies
-RUN pnpm install
-
-# Copy everything else
 COPY . .
-
-# Generate prisma client
-RUN pnpx prisma generate
-
-# Build the project
-RUN pnpm build
-
-# ------ Final Stage ------
-FROM node:18-bullseye-slim AS final
-WORKDIR /app
-
-# Install global dependencies
-RUN npm install -g pnpm
-
-# Copy necessary files
-COPY --from=builder /app/dist ./dist
-COPY package.json pnpm-lock.yaml ./
 COPY wait-for.sh wait-for.sh
 
-# Install only production dependencies
-RUN pnpm install --production
+RUN pnpm install
+RUN pnpx prisma generate
+RUN pnpm build
 
-# Expose port
+# FROM node:18-bullseye-slim AS final
+# WORKDIR /app
+# RUN npm install -g pnpm
+# COPY --from=builder ./app/dist ./dist
+# COPY package.json .
+# COPY pnpm-lock.yaml .
+# RUN pnpm install --production
+# RUN pnpx prisma generate
+
 EXPOSE 4000
-
-# Command to run the application
-CMD ["pnpm", "start:migrate"]
+CMD [ "pnpm", "start" ]
