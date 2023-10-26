@@ -19,4 +19,4 @@ RUN pnpm build
 # RUN pnpx prisma generate
 
 EXPOSE 4000
-CMD [ "pnpm", "start" ]
+CMD [ "pnpm", "start:migrate" ]

@@ -21,3 +21,26 @@ spec:
             cpu: "500m"
         ports:
         - containerPort: 4000
+        env:
+          - name: DATABASE_URL
+            valueFrom:
+              secretKeyRef:
+                name: users-secret
+                key: database_url
+          - name: JWT_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: users-secret
+                key: jwt_secret
+          - name: JWT_EXPIRES_IN
+            valueFrom:
+              secretKeyRef:
+                name: users-secret
+                key: jwt_expires_in
+          - name: SALT_ROUNDS
+            valueFrom:
+              secretKeyRef:
+                name: users-secret
+                key: salt_rounds
+          - name: PORT
+            value: "4000"

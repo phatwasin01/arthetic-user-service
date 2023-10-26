@@ -54,6 +54,7 @@ jobs:
       - run: pnpx prisma generate
 
   deploy:
+    needs: [test]
     name: Build Image
     runs-on: ubuntu-latest
     permissions:
@@ -81,9 +82,12 @@ jobs:
           docker build -t asia-southeast1-docker.pkg.dev/arthetic/arthetic-images/users-svc:latest .
           docker push asia-southeast1-docker.pkg.dev/arthetic/arthetic-images/users-svc:latest
 
-      - name: Deploy to GKE
+      - name: Connect to GKE
         run: |
           gcloud components install gke-gcloud-auth-plugin
           gcloud container clusters get-credentials arthetic-cluster --region asia-southeast1 --project arthetic
+
+      - name: Deploy to GKE
+        run: |
           kubectl apply -f gke/deployment.yaml
           kubectl apply -f gke/service.yaml
