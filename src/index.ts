@@ -20,5 +20,5 @@ const server = new ApolloServer<AuthContext>({
     },
   });
 
-  console.log(`🚀  Server ready at: ${url}`);
+  console.log(`🚀  Server ${process.env.NODE_ENV} ready at: ${url}`);
 })();
