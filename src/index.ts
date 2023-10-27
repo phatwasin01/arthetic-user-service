@@ -9,6 +9,7 @@ import { AuthContext } from "./libs/auth";
 
 const server = new ApolloServer<AuthContext>({
   schema: buildSubgraphSchema([{ typeDefs, resolvers }]),
+  nodeEnv: config.NODE_ENV || "development",
 });
 
 (async () => {

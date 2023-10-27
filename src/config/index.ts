@@ -14,6 +14,7 @@ const envSchema = z.object({
     .transform((val) => parseInt(val, 10))
     .optional(),
   DATABASE_URL: z.string().optional(),
+  NODE_ENV: z.string().optional(),
 });
 
 export const config = envSchema.parse(process.env);
