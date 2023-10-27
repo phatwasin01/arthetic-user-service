@@ -6,6 +6,9 @@ spec:
   selector:
     matchLabels:
       app: users-app
+  replicas: 1
+  strategy:
+    type: Recreate
   template:
     metadata:
       labels:
