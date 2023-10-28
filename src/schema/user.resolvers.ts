@@ -18,11 +18,11 @@ const resolvers: GraphQLResolverMap<AuthContext> = {
     users: async () => {
       return await prisma.user.findMany();
     },
-    user: async (_: unknown, args: { id: string }) => {
-      const { id } = args;
+    user: async (_: unknown, args: { username: string }) => {
+      const { username } = args;
       return await prisma.user.findUnique({
         where: {
-          id,
+          username,
         },
       });
     },

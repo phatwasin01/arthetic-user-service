@@ -42,7 +42,7 @@ const typeDefs = gql`
   }
   type Query {
     users: [User]
-    user(id: ID!): User
+    user(username: String!): User
     userFollows(id: ID!): [Follows]
     publicUserProfile(username: String!): User
     userProfile: User
