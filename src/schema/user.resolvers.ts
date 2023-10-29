@@ -104,7 +104,7 @@ const resolvers: GraphQLResolverMap<AuthContext> = {
           followerId: parent.id,
         },
       });
-      const followingIds = following.map((follow) => follow.followerId);
+      const followingIds = following.map((follow) => follow.followingId);
       return followingIds;
     },
   },
