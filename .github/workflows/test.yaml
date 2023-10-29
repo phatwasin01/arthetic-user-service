@@ -93,3 +93,5 @@ jobs:
           kubectl apply -f gke/deployment.yaml
           kubectl apply -f gke/service.yaml
           kubectl rollout restart deployment/users-app
+          sleep 10
+          kubectl rollout restart deployment/gateway-app

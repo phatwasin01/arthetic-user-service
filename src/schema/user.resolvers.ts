@@ -204,36 +204,69 @@ const resolvers: GraphQLResolverMap<AuthContext> = {
     },
     followUser: async (
       parent: unknown,
-      args: { followingId: string },
+      args: { username: string },
       context
     ) => {
       const userId = checkAuthContextThrowError(context);
-      if (userId === args.followingId) {
+      if (userId === args.username) {
         throw new GraphQLError("You cannot follow yourself", {
           extensions: {
             code: "CANNOT_FOLLOW_YOURSELF",
           },
         });
       }
+      const followingUser = await prisma.user.findUnique({
+        where: {
+          username: args.username,
+        },
+        select: {
+          id: true,
+        },
+      });
+      if (!followingUser) {
+        throw new GraphQLError("User not found", {
+          extensions: {
+            code: "USER_NOT_FOUND",
+          },
+        });
+      }
       const follow = await prisma.follow.create({
         data: {
           followerId: userId,
-          followingId: args.followingId,
+          followingId: followingUser.id,
         },
       });
       return follow;
     },
-    unfollowUser: async (
-      parent: any,
-      args: { followingId: string },
-      context
-    ) => {
+    unfollowUser: async (parent: any, args: { username: string }, context) => {
       const userId = checkAuthContextThrowError(context);
+      if (userId === args.username) {
+        throw new GraphQLError("You cannot follow yourself", {
+          extensions: {
+            code: "CANNOT_FOLLOW_YOURSELF",
+          },
+        });
+      }
+      const followingUser = await prisma.user.findUnique({
+        where: {
+          username: args.username,
+        },
+        select: {
+          id: true,
+        },
+      });
+      if (!followingUser) {
+        throw new GraphQLError("User not found", {
+          extensions: {
+            code: "USER_NOT_FOUND",
+          },
+        });
+      }
       const follow = await prisma.follow.delete({
         where: {
           followerId_followingId: {
             followerId: userId,
-            followingId: args.followingId,
+            followingId: followingUser.id,
           },
         },
       });

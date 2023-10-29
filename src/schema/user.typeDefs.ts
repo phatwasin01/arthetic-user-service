@@ -57,8 +57,8 @@ const typeDefs = gql`
       image_url: String
     ): User
     login(username: String!, password: String!): JwtToken
-    followUser(followingId: ID!): Follows
-    unfollowUser(followingId: ID!): Follows
+    followUser(username: ID!): Follows
+    unfollowUser(username: ID!): Follows
   }
 `;
 export default typeDefs;
