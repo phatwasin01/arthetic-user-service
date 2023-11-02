@@ -35,6 +35,11 @@ const typeDefs = gql`
     author: User
     repostUser: User
   }
+  type Product @key(fields: "id userId") {
+    id: ID!
+    userId: String!
+    owner: User
+  }
   type Comments @key(fields: "id userId") {
     id: ID!
     userId: String!

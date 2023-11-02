@@ -273,6 +273,16 @@ const resolvers: GraphQLResolverMap<AuthContext> = {
       return follow;
     },
   },
+  Product: {
+    owner: async (parent: { userId: string }) => {
+      const { userId } = parent;
+      return await prisma.user.findUnique({
+        where: {
+          id: userId,
+        },
+      });
+    },
+  },
 };
 
 export default resolvers;
