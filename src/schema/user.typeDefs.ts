@@ -6,24 +6,24 @@ const typeDefs = gql`
       url: "https://specs.apollo.dev/federation/v2.0"
       import: ["@key", "@shareable"]
     )
-  type User @key(fields: "id followsIds") @shareable {
+  type User @key(fields: "id followingIds") @shareable {
     id: ID!
     username: String!
-    password: String!
     fname: String!
     lname: String!
-    image_url: String
-    follows: [Follows]
-    followers: [Follows]
-    followsIds: [ID]
+    imageUrl: String
+    following: [User!]!
+    followers: [User!]!
+    isFollowing: Boolean!
+    followingIds: [ID!]!
   }
   type JwtToken {
     token: String!
   }
-  type Follows {
-    follower: User
-    following: User
-  }
+  # type Follows {
+  #   follower: User
+  #   following: User
+  # }
   type Likes @key(fields: "userId") {
     userId: ID!
     user: User
@@ -40,15 +40,25 @@ const typeDefs = gql`
     userId: String!
     owner: User
   }
+  # type Message @key(fields: "id senderId receiverId") {
+  #   id: ID!
+  #   senderId: ID!
+  #   receiverId: ID!
+  #   sender: User
+  #   receiver: User
+  # }
   type Comments @key(fields: "id userId") {
     id: ID!
     userId: String!
     author: User
   }
+  type FollowResult {
+    success: Boolean!
+    user: User
+  }
   type Query {
     users: [User]
     user(username: String!): User
-    userFollows(id: ID!): [Follows]
     publicUserProfile(username: String!): User
     userProfile: User
     helloworld: String
@@ -59,11 +69,12 @@ const typeDefs = gql`
       password: String!
       fname: String!
       lname: String!
-      image_url: String
-    ): User
-    login(username: String!, password: String!): JwtToken
-    followUser(username: ID!): Follows
-    unfollowUser(username: ID!): Follows
+      imageUrl: String
+    ): User!
+    updateUser(fname: String, lname: String, imageUrl: String): User!
+    login(username: String!, password: String!): JwtToken!
+    follow(username: ID!): FollowResult!
+    unfollow(username: ID!): FollowResult!
   }
 `;
 export default typeDefs;

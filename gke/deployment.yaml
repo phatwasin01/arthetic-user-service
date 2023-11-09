@@ -19,9 +19,12 @@ spec:
         image: asia-southeast1-docker.pkg.dev/arthetic/arthetic-images/users-svc:latest
         imagePullPolicy: Always
         resources:
+          requests:
+            cpu: "250m"
+            memory: "0.5Gi"
           limits:
-            memory: "512Mi"
-            cpu: "500m"
+            cpu: "250m"
+            memory: "0.5Gi"
         ports:
         - containerPort: 4000
         env:
