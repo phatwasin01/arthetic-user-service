@@ -58,6 +58,7 @@ const typeDefs = gql`
   }
   type Query {
     users: [User]
+    searchUsers(username: String!): [User!]!
     user(username: String!): User
     publicUserProfile(username: String!): User
     userProfile: User

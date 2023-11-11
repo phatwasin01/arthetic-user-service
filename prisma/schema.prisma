@@ -16,7 +16,7 @@ model User {
   password  String
   fname     String
   lname     String
-  image_url String?
+  imageUrl  String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   following Follow[] @relation("Following")

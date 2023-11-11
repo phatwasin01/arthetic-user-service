@@ -42,6 +42,23 @@ const resolvers: GraphQLResolverMap<AuthContext> = {
         },
       });
     },
+    searchUsers: async (
+      parent: unknown,
+      args: { username: string },
+      context
+    ) => {
+      checkAuthContextThrowError(context);
+      const { username } = args;
+      const users = await prisma.user.findMany({
+        where: {
+          username: {
+            contains: username,
+            mode: "insensitive",
+          },
+        },
+      });
+      return users;
+    },
   },
   Posts: {
     author: async (parent: { userId: string }) => {
