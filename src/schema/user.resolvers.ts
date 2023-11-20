@@ -151,7 +151,13 @@ const resolvers: GraphQLResolverMap<AuthContext> = {
   Mutation: {
     createUser: async (
       parent: unknown,
-      args: { username: string; password: string; fname: string; lname: string }
+      args: {
+        username: string;
+        password: string;
+        fname: string;
+        lname: string;
+        imageUrl: string | null;
+      }
     ) => {
       try {
         const hashedPassword = await hashPassword(args.password);
@@ -161,6 +167,7 @@ const resolvers: GraphQLResolverMap<AuthContext> = {
             password: hashedPassword,
             fname: args.fname,
             lname: args.lname,
+            imageUrl: args.imageUrl,
           },
         });
         return user;
