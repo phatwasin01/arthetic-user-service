@@ -57,7 +57,8 @@ const resolvers: GraphQLResolverMap<AuthContext> = {
           },
         },
       });
-      return users;
+      const usersWithoutMe = users.filter((user) => user.id !== context.userId);
+      return usersWithoutMe;
     },
   },
   Posts: {
