@@ -29,6 +29,9 @@ dependencies:
   jsonwebtoken:
     specifier: ^9.0.2
     version: 9.0.2
+  prisma:
+    specifier: ^5.4.1
+    version: 5.4.1
   zod:
     specifier: ^3.22.4
     version: 3.22.4
@@ -55,9 +58,6 @@ devDependencies:
   nodemon:
     specifier: ^3.0.1
     version: 3.0.1
-  prisma:
-    specifier: ^5.4.1
-    version: 5.4.1
   typescript:
     specifier: ^5.2.2
     version: 5.2.2
@@ -434,6 +434,7 @@ packages:
   /@prisma/engines@5.4.1:
     resolution: {integrity: sha512-vJTdY4la/5V3N7SFvWRmSMUh4mIQnyb/MNoDjzVbh9iLmEC+uEykj/1GPviVsorvfz7DbYSQC4RiwmlEpTEvGA==}
     requiresBuild: true
+    dev: false
 
   /@protobufjs/aspromise@1.1.2:
     resolution: {integrity: sha512-j+gKExEuLmKwvz3OgROXtrJ2UG2x8Ch2YZUxahh+s1F2HZ+wAceUNLkvy6zKCPVRkU++ZWQrdxsUeQXmcg4uoQ==}
@@ -1976,6 +1977,7 @@ packages:
     requiresBuild: true
     dependencies:
       '@prisma/engines': 5.4.1
+    dev: false
 
   /proxy-addr@2.0.7:
     resolution: {integrity: sha512-llQsMLSUDUPT44jdrU/O37qlnifitDP+ZwrmmZcoSKyLKvtZxpyV0n2/bD/N4tBAAZ/gJEdZU7KMraoK1+XYAg==}

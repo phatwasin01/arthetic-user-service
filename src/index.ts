@@ -9,16 +9,17 @@ import { AuthContext } from "./libs/auth";
 
 const server = new ApolloServer<AuthContext>({
   schema: buildSubgraphSchema([{ typeDefs, resolvers }]),
+  nodeEnv: config.NODE_ENV || "development",
 });
 
 (async () => {
   const { url } = await startStandaloneServer(server, {
-    listen: { port: config.PORT },
+    listen: { port: config.PORT || 4000 },
     context: async ({ req }): Promise<AuthContext> => {
       const userId = req.headers["user-id"] as string | undefined;
       return { userId };
     },
   });
 
-  console.log(`🚀  Server ready at: ${url}`);
+  console.log(`🚀  Server ${process.env.NODE_ENV} ready at: ${url}`);
 })();

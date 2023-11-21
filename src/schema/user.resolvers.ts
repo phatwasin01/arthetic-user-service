@@ -12,18 +12,21 @@ import {
 import { checkAuthContextThrowError } from "../utils/context";
 const resolvers: GraphQLResolverMap<AuthContext> = {
   Query: {
+    helloworld: () => {
+      return "hello world";
+    },
     users: async () => {
       return await prisma.user.findMany();
     },
-    user: async (_: any, args: { id: string }) => {
-      const { id } = args;
+    user: async (_: unknown, args: { username: string }) => {
+      const { username } = args;
       return await prisma.user.findUnique({
         where: {
-          id,
+          username,
         },
       });
     },
-    publicUserProfile: async (_: any, args: { username: string }) => {
+    publicUserProfile: async (_: unknown, args: { username: string }) => {
       const { username } = args;
       return await prisma.user.findUnique({
         where: {
@@ -38,6 +41,24 @@ const resolvers: GraphQLResolverMap<AuthContext> = {
           id: userId,
         },
       });
+    },
+    searchUsers: async (
+      parent: unknown,
+      args: { username: string },
+      context
+    ) => {
+      checkAuthContextThrowError(context);
+      const { username } = args;
+      const users = await prisma.user.findMany({
+        where: {
+          username: {
+            contains: username,
+            mode: "insensitive",
+          },
+        },
+      });
+      const usersWithoutMe = users.filter((user) => user.id !== context.userId);
+      return usersWithoutMe;
     },
   },
   Posts: {
@@ -80,53 +101,63 @@ const resolvers: GraphQLResolverMap<AuthContext> = {
     },
   },
   User: {
-    follows: async (parent: { id: string }) => {
+    following: async (parent: { id: string }) => {
       const following = await prisma.follow.findMany({
         where: {
           followerId: parent.id,
         },
+        select: {
+          following: true,
+        },
       });
-      return following;
+      const followingUsers = following.map((follow) => follow.following);
+      return followingUsers;
     },
     followers: async (parent: { id: string }) => {
-      return await prisma.follow.findMany({
+      const followers = await prisma.follow.findMany({
         where: {
           followingId: parent.id,
         },
+        select: {
+          follower: true,
+        },
       });
+      const followersUsers = followers.map((follow) => follow.follower);
+      return followersUsers;
     },
-    followsIds: async (parent: { id: string }) => {
+    followingIds: async (parent: { id: string }) => {
       const following = await prisma.follow.findMany({
         where: {
           followerId: parent.id,
         },
       });
-      const followingIds = following.map((follow) => follow.followerId);
+      const followingIds = following.map((follow) => follow.followingId);
       return followingIds;
     },
-  },
-  Follows: {
-    follower: async (parent: { followerId: string }) => {
-      const { followerId } = parent;
-      return await prisma.user.findUnique({
+    isFollowing: async (parent: { id: string }, _: unknown, context) => {
+      if (!context.userId) return false;
+      const userId = checkAuthContextThrowError(context);
+      const following = await prisma.follow.findUnique({
         where: {
-          id: followerId,
+          followerId_followingId: {
+            followerId: userId,
+            followingId: parent.id,
+          },
         },
       });
-    },
-    following: async (parent: { followingId: string }) => {
-      const { followingId } = parent;
-      return await prisma.user.findUnique({
-        where: {
-          id: followingId,
-        },
-      });
+      return following !== null;
     },
   },
   Mutation: {
     createUser: async (
-      parent: any,
-      args: { username: string; password: string; fname: string; lname: string }
+      parent: unknown,
+      args: {
+        username: string;
+        password: string;
+        fname: string;
+        lname: string;
+        imageUrl: string | null;
+      }
     ) => {
       try {
         const hashedPassword = await hashPassword(args.password);
@@ -136,6 +167,7 @@ const resolvers: GraphQLResolverMap<AuthContext> = {
             password: hashedPassword,
             fname: args.fname,
             lname: args.lname,
+            imageUrl: args.imageUrl,
           },
         });
         return user;
@@ -156,8 +188,25 @@ const resolvers: GraphQLResolverMap<AuthContext> = {
         });
       }
     },
+    updateUser: async (
+      parent: unknown,
+      args: { fname: string; lname: string; imageUrl: string },
+      context
+    ) => {
+      const userId = checkAuthContextThrowError(context);
+      const user = await prisma.user.update({
+        where: {
+          id: userId,
+        },
+        data: {
+          fname: args.fname,
+          lname: args.lname,
+        },
+      });
+      return user;
+    },
     login: async (
-      parent: any,
+      parent: unknown,
       args: { username: string; password: string }
     ) => {
       try {
@@ -199,38 +248,113 @@ const resolvers: GraphQLResolverMap<AuthContext> = {
         });
       }
     },
-    followUser: async (parent: any, args: { followingId: string }, context) => {
+    follow: async (parent: unknown, args: { username: string }, context) => {
       const userId = checkAuthContextThrowError(context);
-      if (userId === args.followingId) {
+      if (userId === args.username) {
         throw new GraphQLError("You cannot follow yourself", {
           extensions: {
             code: "CANNOT_FOLLOW_YOURSELF",
           },
         });
       }
+      const followingUser = await prisma.user.findUnique({
+        where: {
+          username: args.username,
+        },
+        select: {
+          id: true,
+        },
+      });
+      if (!followingUser) {
+        throw new GraphQLError("User not found", {
+          extensions: {
+            code: "USER_NOT_FOUND",
+          },
+        });
+      }
       const follow = await prisma.follow.create({
         data: {
           followerId: userId,
-          followingId: args.followingId,
+          followingId: followingUser.id,
+        },
+        select: {
+          following: true,
         },
       });
-      return follow;
+      const resultFollowing = {
+        success: true,
+        user: follow.following,
+      };
+      return resultFollowing;
     },
-    unfollowUser: async (
-      parent: any,
-      args: { followingId: string },
-      context
-    ) => {
+    unfollow: async (parent: any, args: { username: string }, context) => {
       const userId = checkAuthContextThrowError(context);
+      if (userId === args.username) {
+        throw new GraphQLError("You cannot follow yourself", {
+          extensions: {
+            code: "CANNOT_FOLLOW_YOURSELF",
+          },
+        });
+      }
+      const followingUser = await prisma.user.findUnique({
+        where: {
+          username: args.username,
+        },
+        select: {
+          id: true,
+        },
+      });
+      if (!followingUser) {
+        throw new GraphQLError("User not found", {
+          extensions: {
+            code: "USER_NOT_FOUND",
+          },
+        });
+      }
       const follow = await prisma.follow.delete({
         where: {
           followerId_followingId: {
             followerId: userId,
-            followingId: args.followingId,
+            followingId: followingUser.id,
           },
         },
+        select: {
+          following: true,
+        },
       });
-      return follow;
+      const resultUnFollowing = {
+        success: true,
+        user: follow.following,
+      };
+      return resultUnFollowing;
+    },
+  },
+  Product: {
+    owner: async (parent: { userId: string }) => {
+      const { userId } = parent;
+      return await prisma.user.findUnique({
+        where: {
+          id: userId,
+        },
+      });
+    },
+  },
+  Message: {
+    sender: async (parent: { senderId: string }) => {
+      const { senderId } = parent;
+      return await prisma.user.findUnique({
+        where: {
+          id: senderId,
+        },
+      });
+    },
+    receiver: async (parent: { receiverId: string }) => {
+      const { receiverId } = parent;
+      return await prisma.user.findUnique({
+        where: {
+          id: receiverId,
+        },
+      });
     },
   },
 };

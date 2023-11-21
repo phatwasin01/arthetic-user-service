@@ -2,9 +2,9 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { config } from "../config";
 
-const saltRounds = config.SALT_ROUNDS;
-const jwtSecret = config.JWT_SECRET;
-const jwtExpiresIn = config.JWT_EXPIRES_IN;
+const saltRounds = config.SALT_ROUNDS || 10;
+const jwtSecret = config.JWT_SECRET || "secret";
+const jwtExpiresIn = config.JWT_EXPIRES_IN || "4h";
 export const hashPassword = async (password: string) => {
   return await bcrypt.hash(password, saltRounds);
 };

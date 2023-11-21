@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node dist/index.js",
     "start:migrate": "prisma migrate deploy && node dist/index.js",
-    "migrate": "prisma migrate deploy",
+    "migrate": "prisma generate && prisma migrate deploy",
     "dev": "nodemon",
     "build": "tsc",
     "lint": "eslint 'src/**/*.ts'"
@@ -23,7 +23,8 @@
     "graphql": "^16.8.1",
     "graphql-tag": "^2.12.6",
     "jsonwebtoken": "^9.0.2",
-    "zod": "^3.22.4"
+    "zod": "^3.22.4",
+    "prisma": "^5.4.1"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.0",
@@ -33,7 +34,6 @@
     "@typescript-eslint/parser": "^6.7.4",
     "eslint": "^8.50.0",
     "nodemon": "^3.0.1",
-    "prisma": "^5.4.1",
     "typescript": "^5.2.2"
   }
 }

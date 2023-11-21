@@ -5,7 +5,7 @@ name: Run Test
 
 on:
   push:
-    branches: ["main"]
+    branches: ["main", "cicd"]
   pull_request:
     branches: ["main"]
 
@@ -50,5 +50,48 @@ jobs:
           node-version: "18"
           cache: "pnpm"
       - run: pnpm install
+      - run: pnpx prisma migrate deploy
+      - run: pnpx prisma generate
       - run: pnpm build
-      - run: pnpm migrate
+
+  deploy:
+    needs: [test]
+    name: Build Image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: "read"
+      id-token: "write"
+      actions: "read"
+    steps:
+      # actions/checkout MUST come before auth
+      - uses: "actions/checkout@v4"
+
+      - id: "auth"
+        name: "Authenticate to Google Cloud"
+        uses: "google-github-actions/auth@v1"
+        with:
+          credentials_json: "${{ secrets.GOOGLE_CREDENTIALS }}"
+
+      - name: "Set up Cloud SDK"
+        uses: "google-github-actions/setup-gcloud@v1"
+
+      - name: Configure Docker
+        run: gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin https://asia-southeast1-docker.pkg.dev
+
+      - name: Build and push
+        run: |
+          docker build -t asia-southeast1-docker.pkg.dev/arthetic/arthetic-images/users-svc:latest .
+          docker push asia-southeast1-docker.pkg.dev/arthetic/arthetic-images/users-svc:latest
+
+      - name: Connect to GKE
+        run: |
+          gcloud components install gke-gcloud-auth-plugin
+          gcloud container clusters get-credentials arthetic-cluster --region asia-southeast1 --project arthetic
+
+      - name: Deploy to GKE
+        run: |
+          kubectl apply -f gke/deployment.yaml
+          kubectl apply -f gke/service.yaml
+          kubectl rollout restart deployment/users-app
+          sleep 10
+          kubectl rollout restart deployment/gateway-app
